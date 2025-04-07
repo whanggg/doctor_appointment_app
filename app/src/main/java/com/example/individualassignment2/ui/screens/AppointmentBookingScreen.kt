@@ -41,9 +41,11 @@ fun AppointmentBookingScreen(
     var additionalNotes by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var hasError by remember { mutableStateOf(false) }
-    
+
     val symptoms = remember { listOf("Fever", "Headache", "Cough", "Fatigue", "Pain") }
     val contactMethods = remember { listOf("Phone", "Email", "SMS") }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -57,7 +59,7 @@ fun AppointmentBookingScreen(
             text = "Booking Appointment with ${doctor.name}",
             style = MaterialTheme.typography.headlineSmall
         )
-        
+
         // Patient Name
         OutlinedTextField(
             value = patientName,
@@ -73,8 +75,7 @@ fun AppointmentBookingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    val context = LocalContext.current
-                    val datePicker = DatePickerDialog(
+                    DatePickerDialog(
                         context,
                         { _, year, month, day ->
                             selectedDate.set(Calendar.YEAR, year)
@@ -84,8 +85,7 @@ fun AppointmentBookingScreen(
                         selectedDate.get(Calendar.YEAR),
                         selectedDate.get(Calendar.MONTH),
                         selectedDate.get(Calendar.DAY_OF_MONTH)
-                    )
-                    datePicker.show()
+                    ).show()
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -109,8 +109,7 @@ fun AppointmentBookingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    val context = LocalContext.current
-                    val timePicker = TimePickerDialog(
+                    TimePickerDialog(
                         context,
                         { _, hour, minute ->
                             selectedTime = Pair(hour, minute)
@@ -118,8 +117,7 @@ fun AppointmentBookingScreen(
                         selectedTime.first,
                         selectedTime.second,
                         true
-                    )
-                    timePicker.show()
+                    ).show()
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -174,7 +172,7 @@ fun AppointmentBookingScreen(
             text = "Contact Information:",
             style = MaterialTheme.typography.bodyLarge
         )
-        
+
         // Contact Number
         OutlinedTextField(
             value = contactNumber,
