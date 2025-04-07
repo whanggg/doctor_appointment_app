@@ -24,7 +24,7 @@ sealed class Screen(val route: String) {
     object ClinicInfo : Screen("clinic_info")
     object DoctorList : Screen("doctor_list")
     object Appointment : Screen("appointment/{doctorId}")
-    object Confirmation : Screen("confirmation/{appointmentId}/{patientName}/{date}/{time}/{reason}/{isNewPatient}/{contactNumber}/{email}/{preferredContactMethod}/{symptoms}/{additionalNotes}")
+    object Confirmation : Screen("confirmation")
     
     fun withArgs(vararg args: String): String {
         return buildString {
@@ -32,17 +32,6 @@ sealed class Screen(val route: String) {
             args.forEachIndexed { index, arg ->
                 tempRoute = when {
                     tempRoute.contains("{doctorId}") -> tempRoute.replace("{doctorId}", arg)
-                    tempRoute.contains("{appointmentId}") -> tempRoute.replace("{appointmentId}", arg)
-                    tempRoute.contains("{patientName}") -> tempRoute.replace("{patientName}", arg)
-                    tempRoute.contains("{date}") -> tempRoute.replace("{date}", arg)
-                    tempRoute.contains("{time}") -> tempRoute.replace("{time}", arg)
-                    tempRoute.contains("{reason}") -> tempRoute.replace("{reason}", arg)
-                    tempRoute.contains("{isNewPatient}") -> tempRoute.replace("{isNewPatient}", arg)
-                    tempRoute.contains("{contactNumber}") -> tempRoute.replace("{contactNumber}", arg)
-                    tempRoute.contains("{email}") -> tempRoute.replace("{email}", arg)
-                    tempRoute.contains("{preferredContactMethod}") -> tempRoute.replace("{preferredContactMethod}", arg)
-                    tempRoute.contains("{symptoms}") -> tempRoute.replace("{symptoms}", arg)
-                    tempRoute.contains("{additionalNotes}") -> tempRoute.replace("{additionalNotes}", arg)
                     else -> "$tempRoute/$arg"
                 }
             }
@@ -90,63 +79,29 @@ fun AppNavigation(
             AppointmentBookingScreen(
                 doctor = doctor,
                 onAppointmentBooked = { appointment ->
-                    // Navigate to confirmation screen with all appointment details
-                    navController.navigate(
-                        Screen.Confirmation.withArgs(
-                            appointment.id,
-                            appointment.patientName,
-                            appointment.date,
-                            appointment.time,
-                            appointment.reason,
-                            appointment.isNewPatient.toString(),
-                            appointment.contactNumber,
-                            appointment.email,
-                            appointment.preferredContactMethod,
-                            appointment.symptoms.joinToString(","),
-                            appointment.additionalNotes
-                        )
-                    )
+                    // Store the appointment in the back stack entry
+                    navController.currentBackStackEntry?.savedStateHandle?.set("appointment", appointment)
+                    // Navigate to confirmation screen
+                    navController.navigate(Screen.Confirmation.route)
                 }
             )
         }
         
-        composable(
-            route = Screen.Confirmation.route,
-            arguments = listOf(
-                navArgument("appointmentId") { type = NavType.StringType },
-                navArgument("patientName") { type = NavType.StringType },
-                navArgument("date") { type = NavType.StringType },
-                navArgument("time") { type = NavType.StringType },
-                navArgument("reason") { type = NavType.StringType },
-                navArgument("isNewPatient") { type = NavType.StringType },
-                navArgument("contactNumber") { type = NavType.StringType },
-                navArgument("email") { type = NavType.StringType },
-                navArgument("preferredContactMethod") { type = NavType.StringType },
-                navArgument("symptoms") { type = NavType.StringType },
-                navArgument("additionalNotes") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val appointment = Appointment(
-                id = backStackEntry.arguments?.getString("appointmentId") ?: "",
-                doctorId = "",
-                patientName = backStackEntry.arguments?.getString("patientName") ?: "",
-                date = backStackEntry.arguments?.getString("date") ?: "",
-                time = backStackEntry.arguments?.getString("time") ?: "",
-                reason = backStackEntry.arguments?.getString("reason") ?: "",
-                isNewPatient = backStackEntry.arguments?.getString("isNewPatient")?.toBoolean() ?: true,
-                contactNumber = backStackEntry.arguments?.getString("contactNumber") ?: "",
-                email = backStackEntry.arguments?.getString("email") ?: "",
-                preferredContactMethod = backStackEntry.arguments?.getString("preferredContactMethod") ?: "",
-                symptoms = backStackEntry.arguments?.getString("symptoms")?.split(",") ?: listOf(),
-                additionalNotes = backStackEntry.arguments?.getString("additionalNotes") ?: ""
-            )
+        composable(Screen.Confirmation.route) {
+            // Retrieve the appointment from the previous back stack entry
+            val appointment = navController.previousBackStackEntry?.savedStateHandle?.get<Appointment>("appointment")
             
-            AppointmentConfirmationScreen(
-                appointment = appointment,
-                onDone = {
-                    navController.popBackStack(Screen.DoctorList.route, false)
-                }
-            )
+            if (appointment != null) {
+                AppointmentConfirmationScreen(
+                    appointment = appointment,
+                    onDone = {
+                        navController.popBackStack(Screen.DoctorList.route, false)
+                    }
+                )
+            } else {
+                // If no appointment data is found, go back to doctor list
+                navController.popBackStack(Screen.DoctorList.route, false)
+            }
         }
         
         composable(Screen.ClinicInfo.route) {
