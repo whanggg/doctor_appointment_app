@@ -2,6 +2,9 @@ package com.example.individualassignment2.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,6 +48,8 @@ fun AppNavigation(
     clinic: Clinic,
     navController: NavHostController = rememberNavController()
 ) {
+    var currentAppointment by remember { mutableStateOf<Appointment?>(null) }
+    
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -79,27 +84,24 @@ fun AppNavigation(
             AppointmentBookingScreen(
                 doctor = doctor,
                 onAppointmentBooked = { appointment ->
-                    // Store the appointment in the back stack entry
-                    navController.currentBackStackEntry?.savedStateHandle?.set("appointment", appointment)
-                    // Navigate to confirmation screen
+                    currentAppointment = appointment
                     navController.navigate(Screen.Confirmation.route)
                 }
             )
         }
         
         composable(Screen.Confirmation.route) {
-            // Retrieve the appointment from the previous back stack entry
-            val appointment = navController.previousBackStackEntry?.savedStateHandle?.get<Appointment>("appointment")
-            
+            val appointment = currentAppointment
             if (appointment != null) {
                 AppointmentConfirmationScreen(
                     appointment = appointment,
                     onDone = {
+                        currentAppointment = null
                         navController.popBackStack(Screen.DoctorList.route, false)
                     }
                 )
             } else {
-                // If no appointment data is found, go back to doctor list
+                // If no appointment is available, go back to doctor list
                 navController.popBackStack(Screen.DoctorList.route, false)
             }
         }
