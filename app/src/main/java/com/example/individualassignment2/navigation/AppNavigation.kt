@@ -7,11 +7,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.individualassignment2.model.Clinic
 import com.example.individualassignment2.ui.screens.ClinicInformationScreen
+import com.example.individualassignment2.ui.screens.DoctorListScreen
 import com.example.individualassignment2.ui.screens.HomeScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object ClinicInfo : Screen("clinic_info")
+    object DoctorList : Screen("doctor_list")
 }
 
 @Composable
@@ -26,6 +28,16 @@ fun AppNavigation(
         composable(Screen.Home.route) {
             HomeScreen(
                 onGetStarted = {
+                    navController.navigate(Screen.DoctorList.route)
+                }
+            )
+        }
+        
+        composable(Screen.DoctorList.route) {
+            DoctorListScreen(
+                onDoctorClick = { /* Handle doctor click */ },
+                onBookAppointment = { /* Handle appointment booking */ },
+                onClinicInfoClick = {
                     navController.navigate(Screen.ClinicInfo.route)
                 }
             )
