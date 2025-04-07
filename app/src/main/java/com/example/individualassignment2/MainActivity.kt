@@ -5,11 +5,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.*
-import com.example.individualassignment2.model.Appointment
 import com.example.individualassignment2.model.Clinic
-import com.example.individualassignment2.model.Doctor
-import com.example.individualassignment2.ui.screens.*
+import com.example.individualassignment2.navigation.AppNavigation
 import com.example.individualassignment2.ui.theme.IndividualAssignment2Theme
 
 class MainActivity : ComponentActivity() {
@@ -47,59 +44,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             IndividualAssignment2Theme {
-                var currentScreen by remember { mutableStateOf<Screen>(Screen.DoctorList) }
-                var selectedDoctor: Doctor? by remember { mutableStateOf(null) }
-                var currentAppointment: Appointment? by remember { mutableStateOf(null) }
-
-                when (currentScreen) {
-                    Screen.ClinicInfo -> {
-                        ClinicInformationScreen(
-                            clinic = clinic,
-                            onNavigateBack = { currentScreen = Screen.DoctorList }
-                        )
-                    }//comment
-                    Screen.DoctorList -> {
-                        DoctorListScreen(
-                            onDoctorClick = { doctor ->
-                                Toast.makeText(
-                                    this,
-                                    "Selected doctor: ${doctor.name}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            onBookAppointment = { doctor ->
-                                selectedDoctor = doctor
-                                currentScreen = Screen.BookAppointment
-                            },
-                            onClinicInfoClick = {
-                                currentScreen = Screen.ClinicInfo
-                            }
-                        )
-                    }
-                    Screen.BookAppointment -> {
-                        selectedDoctor?.let { doctor ->
-                            AppointmentBookingScreen(
-                                doctor = doctor,
-                                onAppointmentBooked = { appointment ->
-                                    currentAppointment = appointment
-                                    currentScreen = Screen.Confirmation
-                                }
-                            )
-                        }
-                    }
-                    Screen.Confirmation -> {
-                        currentAppointment?.let { appointment ->
-                            AppointmentConfirmationScreen(
-                                appointment = appointment,
-                                onDone = {
-                                    currentAppointment = null
-                                    selectedDoctor = null
-                                    currentScreen = Screen.DoctorList
-                                }
-                            )
-                        }
-                    }
-                }
+                AppNavigation(clinic = clinic)
             }
         }
     }
