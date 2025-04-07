@@ -13,6 +13,7 @@ import com.example.individualassignment2.ui.screens.AppointmentBookingScreen
 import com.example.individualassignment2.ui.screens.ClinicInformationScreen
 import com.example.individualassignment2.ui.screens.DoctorListScreen
 import com.example.individualassignment2.ui.screens.HomeScreen
+import androidx.compose.material3.Text
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -49,35 +50,37 @@ fun AppNavigation(
         
         composable(Screen.DoctorList.route) {
             DoctorListScreen(
-                onDoctorClick = { doctor ->
-                    navController.navigate(Screen.Appointment.withArgs(doctor.id))
-                },
-                onBookAppointment = { /* Handle appointment booking */ },
+                clinic = clinic,
+                navController = navController,
                 onClinicInfoClick = {
                     navController.navigate(Screen.ClinicInfo.route)
+                },
+                onDoctorClick = { doctorId ->
+                    navController.navigate(Screen.Appointment.withArgs(doctorId))
                 }
             )
         }
-        
+
         composable(Screen.Appointment.route) { backStackEntry ->
-            val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
-            val doctor = remember { Doctor.getDoctorById(doctorId) } // Use the companion object function
+            val doctorId = backStackEntry.arguments?.getString("doctorId")
+            val doctor = getDoctorById(doctorId ?: "")
             
-            AppointmentBookingScreen(
-                doctor = doctor,
-                onAppointmentBooked = { appointment ->
-                    // Handle appointment booking
-                    navController.popBackStack()
-                }
-            )
+            if (doctor.id.isNotEmpty()) {
+                AppointmentBookingScreen(
+                    doctor = doctor,
+                    onAppointmentBooked = { appointment ->
+                        navController.popBackStack()
+                    }
+                )
+            } else {
+                Text("Doctor not found")
+            }
         }
-        
+
         composable(Screen.ClinicInfo.route) {
             ClinicInformationScreen(
                 clinic = clinic,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

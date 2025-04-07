@@ -9,14 +9,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.example.individualassignment2.navigation.Screen
+import com.example.individualassignment2.model.Clinic
 import com.example.individualassignment2.model.Doctor
 import com.example.individualassignment2.ui.components.DoctorProfileCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorListScreen(
-    onDoctorClick: (Doctor) -> Unit,
-    onBookAppointment: (Doctor) -> Unit,
+    clinic: Clinic,
+    navController: NavHostController,
     onClinicInfoClick: () -> Unit
 ) {
     // Sample data - In a real app, this would come from a ViewModel
@@ -87,8 +90,12 @@ fun DoctorListScreen(
             items(doctors) { doctor ->
                 DoctorProfileCard(
                     doctor = doctor,
-                    onClick = { onDoctorClick(doctor) },
-                    onBookAppointment = { onBookAppointment(doctor) }
+                    onClick = { 
+                        navController.navigate(Screen.Appointment.withArgs(doctor.id))
+                    },
+                    onBookAppointment = { 
+                        navController.navigate(Screen.Appointment.withArgs(doctor.id))
+                    }
                 )
             }
         }
