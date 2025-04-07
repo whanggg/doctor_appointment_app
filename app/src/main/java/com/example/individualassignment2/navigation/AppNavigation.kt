@@ -24,7 +24,7 @@ sealed class Screen(val route: String) {
     object ClinicInfo : Screen("clinic_info")
     object DoctorList : Screen("doctor_list")
     object Appointment : Screen("appointment/{doctorId}")
-    object Confirmation : Screen("confirmation/{appointmentId}")
+    object Confirmation : Screen("confirmation/{appointmentId}/{patientName}/{date}/{time}/{reason}/{isNewPatient}/{contactNumber}/{email}/{preferredContactMethod}/{symptoms}/{additionalNotes}")
     
     fun withArgs(vararg args: String): String {
         return buildString {
@@ -33,6 +33,16 @@ sealed class Screen(val route: String) {
                 tempRoute = when {
                     tempRoute.contains("{doctorId}") -> tempRoute.replace("{doctorId}", arg)
                     tempRoute.contains("{appointmentId}") -> tempRoute.replace("{appointmentId}", arg)
+                    tempRoute.contains("{patientName}") -> tempRoute.replace("{patientName}", arg)
+                    tempRoute.contains("{date}") -> tempRoute.replace("{date}", arg)
+                    tempRoute.contains("{time}") -> tempRoute.replace("{time}", arg)
+                    tempRoute.contains("{reason}") -> tempRoute.replace("{reason}", arg)
+                    tempRoute.contains("{isNewPatient}") -> tempRoute.replace("{isNewPatient}", arg)
+                    tempRoute.contains("{contactNumber}") -> tempRoute.replace("{contactNumber}", arg)
+                    tempRoute.contains("{email}") -> tempRoute.replace("{email}", arg)
+                    tempRoute.contains("{preferredContactMethod}") -> tempRoute.replace("{preferredContactMethod}", arg)
+                    tempRoute.contains("{symptoms}") -> tempRoute.replace("{symptoms}", arg)
+                    tempRoute.contains("{additionalNotes}") -> tempRoute.replace("{additionalNotes}", arg)
                     else -> "$tempRoute/$arg"
                 }
             }
@@ -80,8 +90,22 @@ fun AppNavigation(
             AppointmentBookingScreen(
                 doctor = doctor,
                 onAppointmentBooked = { appointment ->
-                    // Navigate to confirmation screen with appointment ID
-                    navController.navigate(Screen.Confirmation.withArgs(appointment.id))
+                    // Navigate to confirmation screen with all appointment details
+                    navController.navigate(
+                        Screen.Confirmation.withArgs(
+                            appointment.id,
+                            appointment.patientName,
+                            appointment.date,
+                            appointment.time,
+                            appointment.reason,
+                            appointment.isNewPatient.toString(),
+                            appointment.contactNumber,
+                            appointment.email,
+                            appointment.preferredContactMethod,
+                            appointment.symptoms.joinToString(","),
+                            appointment.additionalNotes
+                        )
+                    )
                 }
             )
         }
@@ -89,27 +113,32 @@ fun AppNavigation(
         composable(
             route = Screen.Confirmation.route,
             arguments = listOf(
-                navArgument("appointmentId") { type = NavType.StringType }
+                navArgument("appointmentId") { type = NavType.StringType },
+                navArgument("patientName") { type = NavType.StringType },
+                navArgument("date") { type = NavType.StringType },
+                navArgument("time") { type = NavType.StringType },
+                navArgument("reason") { type = NavType.StringType },
+                navArgument("isNewPatient") { type = NavType.StringType },
+                navArgument("contactNumber") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType },
+                navArgument("preferredContactMethod") { type = NavType.StringType },
+                navArgument("symptoms") { type = NavType.StringType },
+                navArgument("additionalNotes") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val appointmentId = backStackEntry.arguments?.getString("appointmentId") ?: ""
-            val calendar = Calendar.getInstance()
-            val formattedDate = "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.DAY_OF_MONTH)}"
-            
-            // Create a temporary appointment object for demonstration
             val appointment = Appointment(
-                id = appointmentId,
+                id = backStackEntry.arguments?.getString("appointmentId") ?: "",
                 doctorId = "",
-                patientName = "John Doe",
-                date = formattedDate,
-                time = "10:00",
-                reason = "Checkup",
-                isNewPatient = true,
-                contactNumber = "1234567890",
-                email = "john@example.com",
-                preferredContactMethod = "Phone",
-                symptoms = listOf(),
-                additionalNotes = ""
+                patientName = backStackEntry.arguments?.getString("patientName") ?: "",
+                date = backStackEntry.arguments?.getString("date") ?: "",
+                time = backStackEntry.arguments?.getString("time") ?: "",
+                reason = backStackEntry.arguments?.getString("reason") ?: "",
+                isNewPatient = backStackEntry.arguments?.getString("isNewPatient")?.toBoolean() ?: true,
+                contactNumber = backStackEntry.arguments?.getString("contactNumber") ?: "",
+                email = backStackEntry.arguments?.getString("email") ?: "",
+                preferredContactMethod = backStackEntry.arguments?.getString("preferredContactMethod") ?: "",
+                symptoms = backStackEntry.arguments?.getString("symptoms")?.split(",") ?: listOf(),
+                additionalNotes = backStackEntry.arguments?.getString("additionalNotes") ?: ""
             )
             
             AppointmentConfirmationScreen(
