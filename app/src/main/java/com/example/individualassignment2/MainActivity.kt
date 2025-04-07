@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                             clinic = clinic,
                             onNavigateBack = { currentScreen = Screen.DoctorList }
                         )
-                    }
+                    }//comment
                     Screen.DoctorList -> {
                         DoctorListScreen(
                             onDoctorClick = { doctor ->
