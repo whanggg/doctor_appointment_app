@@ -41,10 +41,9 @@ fun AppointmentBookingScreen(
     var additionalNotes by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var hasError by remember { mutableStateOf(false) }
-
+    
     val symptoms = remember { listOf("Fever", "Headache", "Cough", "Fatigue", "Pain") }
     val contactMethods = remember { listOf("Phone", "Email", "SMS") }
-
     val context = LocalContext.current
 
     Column(
@@ -59,7 +58,7 @@ fun AppointmentBookingScreen(
             text = "Booking Appointment with ${doctor.name}",
             style = MaterialTheme.typography.headlineSmall
         )
-
+        
         // Patient Name
         OutlinedTextField(
             value = patientName,
@@ -172,7 +171,7 @@ fun AppointmentBookingScreen(
             text = "Contact Information:",
             style = MaterialTheme.typography.bodyLarge
         )
-
+        
         // Contact Number
         OutlinedTextField(
             value = contactNumber,
