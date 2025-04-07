@@ -252,34 +252,37 @@ fun AppointmentBookingScreen(
             onValueChange = { additionalNotes = it },
             label = { Text("Additional Notes") },
             modifier = Modifier.fillMaxWidth(),
-            maxLines = 3,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         // Submit Button
         Button(
             onClick = {
-                if (validateForm(patientName, reasonForVisit, contactNumber)) {
-                    val appointment = Appointment(
-                        id = UUID.randomUUID().toString(),
-                        doctorId = doctor.id,
-                        patientName = patientName,
-                        date = "${selectedDate.get(Calendar.YEAR)}-${selectedDate.get(Calendar.MONTH) + 1}-${selectedDate.get(Calendar.DAY_OF_MONTH)}",
-                        time = String.format("%02d:%02d", selectedTime.first, selectedTime.second),
-                        reason = reasonForVisit,
-                        isNewPatient = isNewPatient,
-                        preferredContactMethod = preferredContactMethod,
-                        contactNumber = contactNumber,
-                        email = email,
-                        symptoms = selectedSymptoms.toList(),
-                        additionalNotes = additionalNotes
-                    )
-                    onAppointmentBooked(appointment)
-                } else {
+                if (patientName.isBlank() || reasonForVisit.isBlank() || contactNumber.isBlank()) {
                     hasError = true
+                    return@Button
                 }
+                
+                val appointment = Appointment(
+                    id = UUID.randomUUID().toString(),
+                    doctorId = doctor.id,
+                    patientName = patientName,
+                    date = "${selectedDate.get(Calendar.YEAR)}-${selectedDate.get(Calendar.MONTH) + 1}-${selectedDate.get(Calendar.DAY_OF_MONTH)}",
+                    time = "${selectedTime.first}:${selectedTime.second}",
+                    reason = reasonForVisit,
+                    isNewPatient = isNewPatient,
+                    contactNumber = contactNumber,
+                    email = email,
+                    preferredContactMethod = preferredContactMethod,
+                    symptoms = selectedSymptoms.toList(),
+                    additionalNotes = additionalNotes
+                )
+                
+                onAppointmentBooked(appointment)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
         ) {
             Text("Book Appointment")
         }

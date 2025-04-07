@@ -15,12 +15,16 @@ import com.example.individualassignment2.ui.screens.AppointmentBookingScreen
 import com.example.individualassignment2.ui.screens.ClinicInformationScreen
 import com.example.individualassignment2.ui.screens.DoctorListScreen
 import com.example.individualassignment2.ui.screens.HomeScreen
+import com.example.individualassignment2.ui.screens.AppointmentConfirmationScreen
+import com.example.individualassignment2.model.Appointment
+import java.util.*
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object ClinicInfo : Screen("clinic_info")
     object DoctorList : Screen("doctor_list")
     object Appointment : Screen("appointment/{doctorId}")
+    object Confirmation : Screen("confirmation/{appointmentId}")
     
     fun withArgs(vararg args: String): String {
         return buildString {
@@ -28,6 +32,7 @@ sealed class Screen(val route: String) {
             args.forEachIndexed { index, arg ->
                 tempRoute = when {
                     tempRoute.contains("{doctorId}") -> tempRoute.replace("{doctorId}", arg)
+                    tempRoute.contains("{appointmentId}") -> tempRoute.replace("{appointmentId}", arg)
                     else -> "$tempRoute/$arg"
                 }
             }
@@ -75,8 +80,42 @@ fun AppNavigation(
             AppointmentBookingScreen(
                 doctor = doctor,
                 onAppointmentBooked = { appointment ->
-                    // Handle appointment booking and navigate back
-                    navController.popBackStack()
+                    // Navigate to confirmation screen with appointment ID
+                    navController.navigate(Screen.Confirmation.withArgs(appointment.id))
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.Confirmation.route,
+            arguments = listOf(
+                navArgument("appointmentId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val appointmentId = backStackEntry.arguments?.getString("appointmentId") ?: ""
+            val calendar = Calendar.getInstance()
+            val formattedDate = "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.DAY_OF_MONTH)}"
+            
+            // Create a temporary appointment object for demonstration
+            val appointment = Appointment(
+                id = appointmentId,
+                doctorId = "",
+                patientName = "John Doe",
+                date = formattedDate,
+                time = "10:00",
+                reason = "Checkup",
+                isNewPatient = true,
+                contactNumber = "1234567890",
+                email = "john@example.com",
+                preferredContactMethod = "Phone",
+                symptoms = listOf(),
+                additionalNotes = ""
+            )
+            
+            AppointmentConfirmationScreen(
+                appointment = appointment,
+                onDone = {
+                    navController.popBackStack(Screen.DoctorList.route, false)
                 }
             )
         }
