@@ -1,13 +1,11 @@
 package com.example.individualassignment2.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.individualassignment2.model.Clinic
-import com.example.individualassignment2.model.Doctor
 import com.example.individualassignment2.model.Doctor.Companion.getDoctorById
 import com.example.individualassignment2.ui.screens.AppointmentBookingScreen
 import com.example.individualassignment2.ui.screens.ClinicInformationScreen
@@ -20,7 +18,7 @@ sealed class Screen(val route: String) {
     object ClinicInfo : Screen("clinic_info")
     object DoctorList : Screen("doctor_list")
     object Appointment : Screen("appointment/{doctorId}")
-    
+
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)
@@ -47,24 +45,22 @@ fun AppNavigation(
                 }
             )
         }
-        
+
         composable(Screen.DoctorList.route) {
             DoctorListScreen(
                 clinic = clinic,
                 navController = navController,
                 onClinicInfoClick = {
                     navController.navigate(Screen.ClinicInfo.route)
-                },
-                onDoctorClick = { doctorId ->
-                    navController.navigate(Screen.Appointment.withArgs(doctorId))
                 }
+                // Remove any additional parameter since DoctorListScreen doesn't need it
             )
         }
 
         composable(Screen.Appointment.route) { backStackEntry ->
             val doctorId = backStackEntry.arguments?.getString("doctorId")
             val doctor = getDoctorById(doctorId ?: "")
-            
+
             if (doctor.id.isNotEmpty()) {
                 AppointmentBookingScreen(
                     doctor = doctor,
